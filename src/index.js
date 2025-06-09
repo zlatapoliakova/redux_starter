@@ -1,65 +1,35 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {createStore} from 'redux';
+import {createStore, bindActionCreators} from 'redux';
+import reducer from './reducer';
+import * as actions from './actions';
 
-const initialState = {value: 0};
+const store = createStore(reducer);
 
-const reduce = (state = initialState, action) => {
-  switch(action.type) {
-    case "INC":
-      return {
-        ...state,
-        value: state.value + 1
-      };
-    case "DEC":
-      return {
-        ...state,
-        value: state.value - 1
-      };
-    case "RND":
-      return {
-        ...state,
-        value: state.value * action.payload
-      };
-    default:
-      return {
-        ...state,
-        value: state.value
-      };
-  }
-}
-
-const store = createStore(reduce);
+const {dispatch, subscribe, getState} = store;
 
 const update = () => {
-  return document.getElementById("counter").textContent = store.getState().value;
+  return document.getElementById("counter").textContent = getState().value;
 }
 
-store.subscribe(() => {
-  update();
-});
+subscribe(update);
 
-const inc = () => ({type: "INC"});
-const dec = () => ({type: "DEC"});
-const rnd = (value) => ({type: "RND", payload: value});
+// const bindActionCreator = (creator, dispatch) => (...args) => {
+//   dispatch(creator(...args));
+// }
 
-document.getElementById("inc").addEventListener('click', () => {
-  store.dispatch(inc());
-});
+const {inc, dec, rnd} = bindActionCreators(actions, dispatch);
+// const decDispatch = bindActionCreators(dec, dispatch);
+// const rndDispatch = bindActionCreators(rnd, dispatch);
 
-document.getElementById("dec").addEventListener('click', () => {
-  store.dispatch(dec());
-});
+document.getElementById("inc").addEventListener('click', inc);
+
+document.getElementById("dec").addEventListener('click', dec);
 
 document.getElementById("rnd").addEventListener('click', () => {
   const value = Math.floor(Math.random() * 10);
-  store.dispatch(rnd(value));
+  rnd(value);
 });
-
-// let state = reduce(undefined, {type: 'INC'});
-//  state = reduce(state, {type: 'INC'});
-//  state = reduce(state, {type: 'INC'});
-//  state = reduce(state, {type: 'INC'});
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
